@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import Cell from './Cell';
 
@@ -11,11 +11,13 @@ function randomBool() {
 }
 
 function createBoard(size, blank=false) {
-  return range(size).map(() => range(size).map(() => blank ? false : randomBool()));
+  return blank
+    ? range(size).map(() => Array(size).fill(false))
+    : range(size).map(() => range(size).map(randomBool));
 }
 
 function copyBoard(board) {
-  return board.map(row => row.map(cell => cell));
+  return board.map(row => row.slice());
 }
 
 function livingNeighborCount(row, col, board) {
@@ -47,7 +49,8 @@ function perflivingNeighborCount(row, col, board) {
 }
 
 function nextBoard(oldBoard) {
-  const newBoard = copyBoard(oldBoard);
+  const newBoard = createBoard(oldBoard.length, true);
+
   for (let row = 0; row < newBoard.length; row++) {
     for (let col = 0; col < newBoard[0].length; col++) {
       const isAlive = oldBoard[row][col];
@@ -56,6 +59,8 @@ function nextBoard(oldBoard) {
         newBoard[row][col] = false;
       } else if (!isAlive && count === 3) {
         newBoard[row][col] = true;
+      } else {
+        newBoard[row][col] = isAlive;
       }
     }
   }
@@ -66,10 +71,9 @@ function nextBoard(oldBoard) {
 function App() {
   const initialBoardSize = 50;
 
-  const [board, setBoard] = useState(createBoard(initialBoardSize));
+  const [board, setBoard] = useState(() => createBoard(initialBoardSize));
   const [isRunning, setIsRunning] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
-
   const boardSize = () => board.length;
 
   const toggleAlive = (row, col) => {
