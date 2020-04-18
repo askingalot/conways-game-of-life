@@ -1,11 +1,9 @@
 import React from 'react';
 
-export default function Cell({ isAlive, coords }) {
+export default function Cell({ isAlive, coords, toggleAlive }) {
   const classes = 'cell ' + (isAlive ? 'is-alive' : '');
-  const [row, col] = coords;
   return (
-    <div className={classes}>
-     ({row}, {col})
+    <div className={classes} onClick={() => toggleAlive(coords)}>
     </div>
   );
 }
