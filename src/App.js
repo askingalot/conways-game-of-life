@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import Cell from './Cell';
-
-let tickCount = 0;
+import BoolArray from './BoolArray';
 
 function range(size) {
   return [...Array(size).keys()];
@@ -12,28 +11,17 @@ function randomBool() {
   return Math.random() >= 0.5;
 }
 
-function createBoard(size, blank=false) {
+function createBoard(size, blank = false) {
   return blank
-    ? range(size).map(() => Array(size).fill(false))
-    : range(size).map(() => range(size).map(randomBool));
+    ? range(size).map(() => new BoolArray(size))
+    : range(size).map(() => new BoolArray(size, randomBool));
 }
 
 function copyBoard(board) {
-  return board.map(row => row.slice());
+  return board.map(row => new BoolArray(row));
 }
 
 function livingNeighborCount(row, col, board) {
-  const neighborIndexes = 
-    [[row - 1, col - 1], [row - 1, col], [row - 1, col + 1],
-     [row,     col - 1],                 [row,     col + 1],
-     [row + 1, col - 1], [row + 1, col], [row + 1, col + 1]];
-
-  return neighborIndexes
-    .filter(([r, c]) => r >= 0 && r < board.length && c >= 0 && c < board.length)
-    .reduce((count, [r, c]) => count + (board[r][c] ? 1 : 0), 0);
-}
-
-function perflivingNeighborCount(row, col, board) {
   let aliveCount = 0
   for (let r = row - 1; r <= row + 1; r++) {
     if (r < 0 || r >= board.length) continue;
@@ -41,7 +29,7 @@ function perflivingNeighborCount(row, col, board) {
     for (let c = col - 1; c <= col + 1; c++) {
       if (c < 0 || c >= board.length || (r === row && c === col)) continue;
 
-      if (board[r][c]) {
+      if (board[r].get(c)) {
         aliveCount++
       }
     }
@@ -51,18 +39,16 @@ function perflivingNeighborCount(row, col, board) {
 }
 
 function nextBoard(oldBoard) {
-  const newBoard = createBoard(oldBoard.length, true);
+  const newBoard = copyBoard(oldBoard);
 
   for (let row = 0; row < newBoard.length; row++) {
     for (let col = 0; col < newBoard[0].length; col++) {
-      const isAlive = oldBoard[row][col];
-      const count = perflivingNeighborCount(row, col, oldBoard);
+      const isAlive = oldBoard[row].get(col);
+      const count = livingNeighborCount(row, col, oldBoard);
       if (isAlive && (count < 2 || count > 3)) {
-        newBoard[row][col] = false;
+        newBoard[row].set(col, false);
       } else if (!isAlive && count === 3) {
-        newBoard[row][col] = true;
-      } else {
-        newBoard[row][col] = isAlive;
+        newBoard[row].set(col, true);
       }
     }
   }
@@ -80,25 +66,19 @@ function App() {
 
   const toggleAlive = (row, col) => {
     const newBoard = copyBoard(board);
-    newBoard[row][col] = !newBoard[row][col];
+    const oldValue = newBoard[row].get(col);
+    newBoard[row].set(col, !oldValue);
     setBoard(newBoard);
   };
 
   useEffect(() => {
     if (isRunning) {
-      console.time("running time");
       const intervalId = setInterval(() => {
-        tickCount++;
-        if (tickCount % 10 === 0) {
-          console.log(tickCount);
-        }
         setBoard(nextBoard)
       }, 200);
       setIntervalId(intervalId);
     } else {
       intervalId && clearInterval(intervalId);
-      console.timeEnd("running time");
-      console.log(tickCount);
       setIntervalId(null);
     }
 
@@ -112,32 +92,34 @@ function App() {
   const resetBoard = evt => setBoard(createBoard(parseInt(evt.target.value)));
 
   const gridColStyle = { gridTemplateColumns: 'auto '.repeat(boardSize()) };
-  const sizeOptions = [ 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 ];
+  const sizeOptions = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
   return (
     <>
       <header id="header">
         {isRunning
           ? <button className="primary" onClick={stop}>Stop</button>
           : <>
-              <button className="primary" onClick={start}>Start</button>
-              <button onClick={random}>Random</button>
-              <button onClick={clear}>Clear</button>
-              <select onChange={resetBoard} value={boardSize()}>
-                {sizeOptions.map(size => <option key={size}>{size}</option>)}
-              </select>
-            </> 
+            <button className="primary" onClick={start}>Start</button>
+            <button onClick={random}>Random</button>
+            <button onClick={clear}>Clear</button>
+            <select onChange={resetBoard} value={boardSize()}>
+              {sizeOptions.map(size => <option key={size}>{size}</option>)}
+            </select>
+          </>
         }
       </header>
       <div id="board" style={gridColStyle}>
         {
           board.map((row, ri) =>
-            row.map((isAlive, ci) =>
-              <Cell key={ri * 10000 + ci}
-                isAlive={isAlive}
-                row={ri}
-                col={ci}
-                toggleAlive={toggleAlive}
-              />
+            Array.from(
+              row.map((isAlive, ci) =>
+                <Cell key={ri * 10000 + ci}
+                  isAlive={isAlive}
+                  row={ri}
+                  col={ci}
+                  toggleAlive={toggleAlive}
+                />
+              )
             )
           )
         }
