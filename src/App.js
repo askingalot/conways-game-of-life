@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import Cell from './Cell';
 
+let tickCount = 0;
+
 function range(size) {
   return [...Array(size).keys()];
 }
@@ -84,12 +86,19 @@ function App() {
 
   useEffect(() => {
     if (isRunning) {
+      console.time("running time");
       const intervalId = setInterval(() => {
+        tickCount++;
+        if (tickCount % 10 === 0) {
+          console.log(tickCount);
+        }
         setBoard(nextBoard)
       }, 200);
       setIntervalId(intervalId);
     } else {
       intervalId && clearInterval(intervalId);
+      console.timeEnd("running time");
+      console.log(tickCount);
       setIntervalId(null);
     }
 
