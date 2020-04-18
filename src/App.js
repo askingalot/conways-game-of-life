@@ -29,12 +29,29 @@ function livingNeighborCount(row, col, board) {
     .reduce((count, [r, c]) => count + (board[r][c] ? 1 : 0), 0);
 }
 
+function perflivingNeighborCount(row, col, board) {
+  let aliveCount = 0
+  for (let r = row - 1; r <= row + 1; r++) {
+    if (r < 0 || r >= board.length) continue;
+
+    for (let c = col - 1; c <= col + 1; c++) {
+      if (c < 0 || c >= board.length || (r === row && c === col)) continue;
+
+      if (board[r][c]) {
+        aliveCount++
+      }
+    }
+  }
+
+  return aliveCount;
+}
+
 function nextBoard(oldBoard) {
   const newBoard = copyBoard(oldBoard);
   for (let row = 0; row < newBoard.length; row++) {
     for (let col = 0; col < newBoard[0].length; col++) {
       const isAlive = oldBoard[row][col];
-      const count = livingNeighborCount(row, col, oldBoard);
+      const count = perflivingNeighborCount(row, col, oldBoard);
       if (isAlive && (count < 2 || count > 3)) {
         newBoard[row][col] = false;
       } else if (!isAlive && count === 3) {
@@ -55,7 +72,7 @@ function App() {
 
   const boardSize = () => board.length;
 
-  const toggleAlive = ([row, col]) => {
+  const toggleAlive = (row, col) => {
     const newBoard = copyBoard(board);
     newBoard[row][col] = !newBoard[row][col];
     setBoard(newBoard);
@@ -65,10 +82,11 @@ function App() {
     if (isRunning) {
       const intervalId = setInterval(() => {
         setBoard(nextBoard)
-      }, 100);
+      }, 200);
       setIntervalId(intervalId);
     } else {
       intervalId && clearInterval(intervalId);
+      setIntervalId(null);
     }
 
     return () => intervalId && clearInterval(intervalId);
@@ -81,7 +99,7 @@ function App() {
   const resetBoard = evt => setBoard(createBoard(parseInt(evt.target.value)));
 
   const gridColStyle = { gridTemplateColumns: 'auto '.repeat(boardSize()) };
-  const sizeOptions = range(10).map(n => (n+1) * 10);
+  const sizeOptions = [ 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 ];
   return (
     <>
       <header id="header">
@@ -103,7 +121,8 @@ function App() {
             row.map((isAlive, ci) =>
               <Cell key={ri * 10000 + ci}
                 isAlive={isAlive}
-                coords={[ri, ci]}
+                row={ri}
+                col={ci}
                 toggleAlive={toggleAlive}
               />
             )
