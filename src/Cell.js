@@ -1,6 +1,11 @@
 import React from 'react';
 
-export default function Cell({ isAlive }) {
+export default function Cell({ isAlive, coords }) {
   const classes = 'cell ' + (isAlive ? 'is-alive' : '');
-  return <div className={classes}>Foo</div>;
+  const [row, col] = coords;
+  return (
+    <div className={classes}>
+     ({row}, {col})
+    </div>
+  );
 }
