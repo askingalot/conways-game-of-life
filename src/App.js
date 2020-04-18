@@ -47,10 +47,13 @@ function nextBoard(oldBoard) {
 }
 
 function App() {
-  const boardSize = 60;
-  const [board, setBoard] = useState(createBoard(boardSize));
+  const initialBoardSize = 50;
+
+  const [board, setBoard] = useState(createBoard(initialBoardSize));
   const [isRunning, setIsRunning] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
+
+  const boardSize = () => board.length;
 
   const toggleAlive = ([row, col]) => {
     const newBoard = copyBoard(board);
@@ -61,8 +64,8 @@ function App() {
   useEffect(() => {
     if (isRunning) {
       const intervalId = setInterval(() => {
-        setBoard(board => nextBoard(board));
-      }, 200);
+        setBoard(nextBoard)
+      }, 100);
       setIntervalId(intervalId);
     } else {
       intervalId && clearInterval(intervalId);
@@ -73,19 +76,24 @@ function App() {
 
   const start = () => setIsRunning(true);
   const stop = () => setIsRunning(false);
-  const clear = () => setBoard(createBoard(boardSize, true));
-  const random = () => setBoard(createBoard(boardSize));
+  const clear = () => setBoard(createBoard(boardSize(), true));
+  const random = () => setBoard(createBoard(boardSize()));
+  const resetBoard = evt => setBoard(createBoard(parseInt(evt.target.value)));
 
-  const gridColStyle = { gridTemplateColumns: 'auto '.repeat(boardSize) };
+  const gridColStyle = { gridTemplateColumns: 'auto '.repeat(boardSize()) };
+  const sizeOptions = range(10).map(n => (n+1) * 10);
   return (
     <>
-      <header>
+      <header id="header">
         {isRunning
-          ? <button onClick={stop}>Stop</button>
+          ? <button className="primary" onClick={stop}>Stop</button>
           : <>
-              <button onClick={start}>Start</button>
+              <button className="primary" onClick={start}>Start</button>
               <button onClick={random}>Random</button>
               <button onClick={clear}>Clear</button>
+              <select onChange={resetBoard} value={boardSize()}>
+                {sizeOptions.map(size => <option key={size}>{size}</option>)}
+              </select>
             </> 
         }
       </header>
