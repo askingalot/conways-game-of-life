@@ -20,6 +20,11 @@
   font-weight: bold;
 }
 
+#header select {
+  background-color: white;
+  font-size: larger;
+}
+
 
 #board {
   display: grid;
@@ -29,17 +34,21 @@
 .cell {
   cursor: pointer;
   background-color: #FFF;
-  border: 1px solid #000;
-  height: 1em;
-  padding: 10px;
+  border: 1px solid #666;
+  padding-top: 100%;
 }
 
 .cell:hover {
-  border: 4px solid #AAA;
-  padding: 7px;
+  background-color: #DDD;
+  border-color: #000;
 }
 
-.is-alive {
-  border: 1px solid #fff;
+.cell.is-alive {
   background-color: #000;
+  border-color: #EEE;
+}
+
+.cell.is-alive:hover {
+  background-color: #444;
+  border-color: #fff;
 }

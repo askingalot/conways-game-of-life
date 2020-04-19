@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Cell from './Cell';
 import BoolArray from './BoolArray';
@@ -75,7 +75,7 @@ function App() {
     if (isRunning) {
       const intervalId = setInterval(() => {
         setBoard(nextBoard)
-      }, 200);
+      }, 350);
       setIntervalId(intervalId);
     } else {
       intervalId && clearInterval(intervalId);
@@ -111,15 +111,13 @@ function App() {
       <div id="board" style={gridColStyle}>
         {
           board.map((row, ri) =>
-            Array.from(
-              row.map((isAlive, ci) =>
-                <Cell key={ri * 10000 + ci}
-                  isAlive={isAlive}
-                  row={ri}
-                  col={ci}
-                  toggleAlive={toggleAlive}
-                />
-              )
+            row.map((isAlive, ci) =>
+              <Cell key={ri * 1000 + ci}
+                isAlive={isAlive}
+                row={ri}
+                col={ci}
+                toggleAlive={toggleAlive}
+              />
             )
           )
         }

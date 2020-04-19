@@ -2,7 +2,7 @@ class BoolArray {
   constructor(lengthOrSource, fill) {
     if (typeof lengthOrSource === 'number') {
       this._length = lengthOrSource;
-      this._byteArray = new Uint8Array(this._length / 8);
+      this._byteArray = new Uint8Array((this._length / 8) + 1);
       if (typeof fill === 'function') {
         this.fill(fill);
       }
@@ -16,10 +16,12 @@ class BoolArray {
     return this._length;
   }
 
-  * map(mapFn) {
+  map(mapFn) {
+    const result = new Array(this._length);
     for (let i=0; i<this._length; i++) {
-       yield mapFn(this.get(i), i);
+       result[i] = mapFn(this.get(i), i);
     }
+    return result;
   }
 
   fill(fillFn) {
