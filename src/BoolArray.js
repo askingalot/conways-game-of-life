@@ -18,14 +18,14 @@ class BoolArray {
 
   map(mapFn) {
     const result = new Array(this._length);
-    for (let i=0; i<this._length; i++) {
-       result[i] = mapFn(this.get(i), i);
+    for (let i = 0; i < this._length; i++) {
+      result[i] = mapFn(this.get(i), i);
     }
     return result;
   }
 
   fill(fillFn) {
-    for (let i=0; i<this._length; i++) {
+    for (let i = 0; i < this._length; i++) {
       this.set(i, fillFn(i))
     }
     return this;
@@ -44,10 +44,26 @@ class BoolArray {
     const bitIndex = Math.floor(index % 8);
 
     const byte = this._byteArray[byteIndex];
-    this._byteArray[byteIndex] = value 
+    this._byteArray[byteIndex] = value
       ? byte ^ (1 << bitIndex)
       : byte & (255 - (1 << bitIndex));
   }
 }
 
-export default BoolArray;
+function BoolArrayProxy(lengthOrSource, fill) {
+  return new Proxy(new BoolArray(lengthOrSource, fill), {
+    get(boolAr, prop) {
+      return prop in boolAr ? boolAr[prop] : boolAr.get(prop);
+    },
+    set(boolAr, prop, value) {
+      if (prop in boolAr) {
+        boolAr[prop] = value;
+      } else {
+        boolAr.set(prop, value);
+      }
+      return true;
+    }
+  });
+}
+
+export default BoolArrayProxy;

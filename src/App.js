@@ -29,7 +29,7 @@ function livingNeighborCount(row, col, board) {
     for (let c = col - 1; c <= col + 1; c++) {
       if (c < 0 || c >= board.length || (r === row && c === col)) continue;
 
-      if (board[r].get(c)) {
+      if (board[r][c]) {
         aliveCount++
       }
     }
@@ -43,12 +43,12 @@ function nextBoard(oldBoard) {
 
   for (let row = 0; row < newBoard.length; row++) {
     for (let col = 0; col < newBoard[0].length; col++) {
-      const isAlive = oldBoard[row].get(col);
+      const isAlive = oldBoard[row][col];
       const count = livingNeighborCount(row, col, oldBoard);
       if (isAlive && (count < 2 || count > 3)) {
-        newBoard[row].set(col, false);
+        newBoard[row][col] = false;
       } else if (!isAlive && count === 3) {
-        newBoard[row].set(col, true);
+        newBoard[row][col] = true;
       }
     }
   }
@@ -66,8 +66,8 @@ function App() {
 
   const toggleAlive = (row, col) => {
     const newBoard = copyBoard(board);
-    const oldValue = newBoard[row].get(col);
-    newBoard[row].set(col, !oldValue);
+    const oldValue = newBoard[row][col];
+    newBoard[row][col] = !oldValue;
     setBoard(newBoard);
   };
 
